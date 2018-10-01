@@ -10,10 +10,10 @@ curl -X POST -i http://localhost:8080/stats/flowentry/add --data '{
 "dpid": 64,
 "idle_timeout" : 10030,
 "hard_timeout" : 10030,
-"priority": 1111,
+"priority": 1113,
 "match":{
-   "ipv4_src" : "10.0.3.101/0.0.255.127",
-   "ipv4_dst" : "10.0.1.101/0.0.255.127",
+   "ipv4_src" : "10.0.3.102/0.0.0.127",
+   "ipv4_dst" : "10.0.1.101/0.0.0.127",
    "eth_type": 2048
  },
 "actions":[    {
@@ -37,22 +37,22 @@ curl -X POST -i http://localhost:8080/stats/flowentry/add --data '{
 "dpid": 64,
 "idle_timeout" : 10030,
 "hard_timeout" : 10030,
-"priority": 1111,
+"priority": 1113,
 "match":{
    "ipv4_dst" : "1.1.1.1",
-   "ipv4_src" : "10.0.1.101/0.0.255.127",
+   "ipv4_src" : "10.0.1.101/0.0.0.127",
    "eth_type": 2048
  },
 "actions":[   
     {
         "type": "SET_FIELD",
         "field": "ipv4_dst",   
-        "value": "10.0.3.101"         
+        "value": "10.0.3.102"         
     },
     {
         "type": "SET_FIELD",
         "field": "eth_dst",   
-        "value": "00:00:00:00:00:b1"         
+        "value": "00:00:00:00:00:b2"         
     },
     {
             "type":"OUTPUT",
