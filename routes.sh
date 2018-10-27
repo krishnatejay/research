@@ -61,4 +61,6 @@ curl -X POST -i http://localhost:8080/stats/flowentry/add --data '{
 ]
 }'
 
-
+c1 iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 1.1.1.1 -j DROP
+//This should be ran on both c1 and c2 for httpRequests from scappy to
+//work
