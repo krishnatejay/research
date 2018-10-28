@@ -27,8 +27,8 @@ def addFlowRules(botdIpAddress , botdMacAddress, simulatedAddress):
         clientMacAddress = '00:00:00:00:00:c2'
 
 
-    addFlow1 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_src\" : \""+botdIpAddress+"/0.0.0.127\",   \"ipv4_dst\" : \""+simulatedAddress+"/0.0.0.127\",   \"eth_type\": 2048 },\"actions\":[    {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_src\",           \"value\": \"1.1.1.1\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ clientMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 1    }]}"
-    addFlow2 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_dst\" : \"1.1.1.1\",   \"ipv4_src\" : \""+simulatedAddress+"/0.0.0.127\",   \"eth_type\": 2048 },\"actions\":[       {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_dst\",           \"value\": \""+botdIpAddress+"\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ botdMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 2    }]}"
+    addFlow1 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_src\" : \""+botdIpAddress+"\",   \"ipv4_dst\" : \""+simulatedAddress+"/0.0.255.127\",   \"eth_type\": 2048 },\"actions\":[    {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_src\",           \"value\": \"1.1.1.1\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ clientMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 1    }]}"
+    addFlow2 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_dst\" : \"1.1.1.1\",   \"ipv4_src\" : \""+simulatedAddress+"/0.0.255.127\",   \"eth_type\": 2048 },\"actions\":[       {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_dst\",           \"value\": \""+botdIpAddress+"\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ botdMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 2    }]}"
    
     status, output = commands.getstatusoutput("curl -X POST -i http://localhost:8080/stats/flowentry/add --data '" + addFlow1 + "'");
     print status
@@ -37,8 +37,9 @@ def addFlowRules(botdIpAddress , botdMacAddress, simulatedAddress):
     print status
     print output
 
-for lastDigits in range(101,102):
-    partitions = partitions + ['0.0.0.' + str(lastDigits)  + '/0.0.0.127']
+# Defining all possible partitions. These will be distributed among the nodes approximately equally.
+for lastDigits in range(101,103):
+    partitions = partitions + ['0.0.1.' + str(lastDigits)  + '/0.0.255.127']
 
 def addPartition(ipAddress, macAddress, partition):
         global partitionMappings
