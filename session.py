@@ -1,5 +1,7 @@
 from scapy.all import *
 from threading import Thread
+import sys
+
 
 class TcpSession:
 
@@ -33,17 +35,17 @@ class TcpSession:
 
    def _sniff(self):
       s = L3RawSocket()
-      while self.connected:
+      timeout = time.time() + 10
+      while self.connected and time.time() < timeout:
          p = s.recv(MTU)
-         if p.haslayer(TCP) and p.haslayer(Raw) \
+         if p !=None and p.haslayer(TCP) and p.haslayer(Raw) \
             and p[TCP].dport == self.sport :
 	       print p[TCP]
-      #         print p[TCP][RAW]
+#               print p[TCP][RAW]
                self._ack(p)
          if p.haslayer(TCP) and p[TCP].dport == self.sport \
             and p[TCP].flags & 0x01 == 0x01 : # FIN
-               self._ack_rclose()
-            
+               self._ack_rclose()            
       s.close()
       self._ackThread = None
       print('Acknowledgment thread stopped')
@@ -107,7 +109,7 @@ class TcpSession:
      # assert ack.haslayer(TCP), 'TCP layer missing'
      # assert ack[TCP].flags & 0x10 == 0x10, 'No ACK flag'
      # assert ack[TCP].ack == self.seq , 'Acknowledgment number error'
-sess = TcpSession(('1.1.1.1',8000))
+sess = TcpSession((sys.argv[1],80))
 sess.connect()
 sess.send('GET /index.html HTTP/1.1\r\n\r\n')
 #sess.close()
