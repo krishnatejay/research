@@ -21,25 +21,46 @@ def addFlowRules(botdIpAddress , botdMacAddress, simulatedAddress):
    # botdMacAddress = "00:00:00:00:00:b2"
    # simulatedAddress = "10.0.1.101"
     clientIdentifier = int(simulatedAddress.split(".")[2])
-    if(clientIdentifier <= 150):
-        clientMacAddress = '00:00:00:00:00:c1';
+    if(clientIdentifier <= 50):
+        clientMacAddress = '00:00:00:00:0c:01';
     else:
-        clientMacAddress = '00:00:00:00:00:c2'
+        clientMacAddress = '00:00:00:00:0c:02'
 
 
-    addFlow1 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_src\" : \""+botdIpAddress+"\",   \"ipv4_dst\" : \""+simulatedAddress+"/0.0.255.127\",   \"eth_type\": 2048 },\"actions\":[    {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_src\",           \"value\": \"1.1.1.1\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ clientMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 1    }]}"
-    addFlow2 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_dst\" : \"1.1.1.1\",   \"ipv4_src\" : \""+simulatedAddress+"/0.0.255.127\",   \"eth_type\": 2048 },\"actions\":[       {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_dst\",           \"value\": \""+botdIpAddress+"\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ botdMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 2    }]}"
+    addFlow1 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_src\" : \""+botdIpAddress+"\",   \"ipv4_dst\" : \""+simulatedAddress+"/255.255.0.127\",   \"eth_type\": 2048 },\"actions\":[    {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_src\",           \"value\": \"1.1.1.1\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ clientMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 1    }]}"
+    addFlow2 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_dst\" : \"1.1.1.1\",   \"ipv4_src\" : \""+simulatedAddress+"/255.255.0.127\",   \"eth_type\": 2048 },\"actions\":[       {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_dst\",           \"value\": \""+botdIpAddress+"\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ botdMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 2    }]}"
    
     status, output = commands.getstatusoutput("curl -X POST -i http://localhost:8080/stats/flowentry/add --data '" + addFlow1 + "'");
-    print status
-    print output
+   # print status
+   # print output
     status, output = commands.getstatusoutput("curl -X POST -i http://localhost:8080/stats/flowentry/add --data '" + addFlow2 + "'");
-    print status
-    print output
+  #  print status
+  #  print output
+
+def removeFlowRules(botdIpAddress , botdMacAddress, simulatedAddress):
+   # botdIpAddress = "10.0.3.102";
+   # botdMacAddress = "00:00:00:00:00:b2"
+   # simulatedAddress = "10.0.1.101"
+    clientIdentifier = int(simulatedAddress.split(".")[2])
+    if(clientIdentifier <= 50):
+        clientMacAddress = '00:00:00:00:0c:01';
+    else:
+        clientMacAddress = '00:00:00:00:0c:02'
+
+
+    addFlow1 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_src\" : \""+botdIpAddress+"\",   \"ipv4_dst\" : \""+simulatedAddress+"/255.255.0.127\",   \"eth_type\": 2048 },\"actions\":[    {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_src\",           \"value\": \"1.1.1.1\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ clientMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 1    }]}"
+    addFlow2 = "{\"dpid\": 64,\"idle_timeout\" : 10030,\"hard_timeout\" : 10030,\"priority\": 1113,\"match\":{   \"ipv4_dst\" : \"1.1.1.1\",   \"ipv4_src\" : \""+simulatedAddress+"/255.255.0.127\",   \"eth_type\": 2048 },\"actions\":[       {        \"type\": \"SET_FIELD\",        \"field\": \"ipv4_dst\",           \"value\": \""+botdIpAddress+"\"             },    {        \"type\": \"SET_FIELD\",        \"field\": \"eth_dst\",           \"value\": \""+ botdMacAddress +"\"             },    {            \"type\":\"OUTPUT\",            \"port\": 2    }]}"
+   
+    status, output = commands.getstatusoutput("curl -X POST -i http://localhost:8080/stats/flowentry/delete --data '" + addFlow1 + "'");
+ #   print status
+ #   print output
+    status, output = commands.getstatusoutput("curl -X POST -i http://localhost:8080/stats/flowentry/delete --data '" + addFlow2 + "'");
+ #   print status
+ #   print output
 
 # Defining all possible partitions. These will be distributed among the nodes approximately equally.
-for lastDigits in range(101,103):
-    partitions = partitions + ['0.0.1.' + str(lastDigits)  + '/0.0.255.127']
+for lastDigits in range(1,101):
+    partitions = partitions + ['10.0.0.' + str(lastDigits)  + '/255.255.0.127']
 
 def addPartition(ipAddress, macAddress, partition):
         global partitionMappings
@@ -54,6 +75,7 @@ def addPartition(ipAddress, macAddress, partition):
 def removePartition(ipAddress, macAddress, partition):
         global partitionMappings
         ipMacKey = ipAddress + '#' + macAddress
+        removeFlowRules(ipAddress,macAddress,partition.split("/")[0]);
         partitionMappings[ipMacKey].remove(partition)
 	print "Removing partition to ipaddress : " + ipAddress  + " partition : " + partition
         
@@ -68,8 +90,7 @@ def handleNodeAddition(ipAddress, macAddress) :
             addPartition(ipAddress, macAddress, partition)
             
     else:
-        distributionNumber = (len(currentlyActiveNodes) *
-                len(partitionMappings[partitionMappings.keys()[0]]))/(len(currentlyActiveNodes) + 1)
+        distributionNumber = len(partitions)/len(currentlyActiveNodes) - len(partitions)/(len(currentlyActiveNodes)+1)
         activeNodeKeys = partitionMappings.keys()
         for key in activeNodeKeys:
 		partitionsRebalanced = partitionMappings[key][-distributionNumber:]
@@ -79,7 +100,8 @@ def handleNodeAddition(ipAddress, macAddress) :
                     addPartition(ipAddress, macAddress, partition);
 
     currentlyActiveNodes = currentlyActiveNodes + [ipAddress + '#' + macAddress] 
-    print partitionMappings
+    for key in partitionMappings.keys():
+	print key + " : " + str(partitionMappings[key])
 
 def handleNodeDeletion(ipAddress, macAddress) :
     global partitionMappings

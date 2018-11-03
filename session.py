@@ -5,10 +5,10 @@ import sys
 
 class TcpSession:
 
-   def __init__(self,target):
+   def __init__(self,src, target):
       self.seq = 0
       self.ack = 0
-      self.ip = IP(dst=target[0])
+      self.ip = IP(src= src, dst=target[0])
       self.sport =  random.randint(1025,65500)
       self.dport = target[1]
       self.connected = False
@@ -109,7 +109,7 @@ class TcpSession:
      # assert ack.haslayer(TCP), 'TCP layer missing'
      # assert ack[TCP].flags & 0x10 == 0x10, 'No ACK flag'
      # assert ack[TCP].ack == self.seq , 'Acknowledgment number error'
-sess = TcpSession((sys.argv[1],80))
+sess = TcpSession(sys.argv[1], (sys.argv[2], 80))
 sess.connect()
 sess.send('GET /index.html HTTP/1.1\r\n\r\n')
 #sess.close()

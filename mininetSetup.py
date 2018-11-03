@@ -134,8 +134,8 @@ def startSetup():
     controller1 =net.addController("controller1",controller=RemoteController,ip="127.0.0.1",port=6633)
     controller2 =net.addController("controller2",controller=RemoteController,ip="127.0.0.1",port=6634)
     net.build()
-    c1.cmd('route add default gw 10.0.0.1')
-    c2.cmd('route add default gw 10.0.0.1')
+    c1.cmd('route add default gw 10.0.0.103')
+    c2.cmd('route add default gw 10.0.0.103')
 
     bd1.cmd('route add default gw 10.2.0.1')
     bd2.cmd('route add default gw 10.2.0.1')
@@ -188,6 +188,8 @@ def startSetup():
 
     c1.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 10.2.0.101/24 -j DROP')
     c2.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 10.2.0.101/24 -j DROP')
+    c1.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 1.1.1.1 -j DROP')
+    c2.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 1.1.1.1 -j DROP')
     controller1.start()
     controller2.start()
     s1.start([controller1])
