@@ -11,20 +11,27 @@ class TcpSession:
       self.ip = IP(src= src, dst=target[0])
       self.sport =  random.randint(1025,65500)
       self.dport = target[1]
+      etherSource =   hex(int(src.split('.')[3])).strip('0x')
+      if( len(etherSource) == 1):
+          etherSource = "00:00:00:00:00:0" + etherSource
+      else:
+          etherSource = "00:00:00:00:00:" + etherSource
+      print etherSource
+      self.ether = Ether(src=etherSource, dst = 'ce:33:b3:cc:fb:07')
       self.connected = False
       self._ackThread = None
       self._timeout = 3
       
    def _ack(self, p):
       self.ack = p[TCP].seq + len(p[Raw])
-      ack = self.ip/TCP(sport=self.sport, dport=self.dport, flags='A', seq=self.seq, ack=self.ack)
+      ack = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, flags='A', seq=self.seq, ack=self.ack)
       send(ack)
 
    def _ack_rclose(self):
       self.connected = False
 
       self.ack += 1
-      fin_ack = self.ip/TCP(sport=self.sport, dport=self.dport, flags='FA', seq=self.seq, ack=self.ack)
+      fin_ack = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, flags='FA', seq=self.seq, ack=self.ack)
       ack = sr1(fin_ack, timeout=self._timeout)
       self.seq += 1
 
@@ -57,7 +64,7 @@ class TcpSession:
    def connect(self):
       self.seq = random.randrange(0,(2**32)-1)
 
-      syn = self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='S')
+      syn = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='S')
       syn_ack = sr1(syn, timeout=self._timeout)
       self.seq += 1
       
@@ -66,7 +73,7 @@ class TcpSession:
       assert syn_ack[TCP].ack == self.seq , 'Acknowledgment number error'
 
       self.ack = syn_ack[TCP].seq + 1
-      ack = self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='A', ack=self.ack)
+      ack = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='A', ack=self.ack)
       send(ack)
 
       self.connected = True
@@ -76,7 +83,7 @@ class TcpSession:
    def close(self):
       self.connected = False
 
-      fin = self.ip/TCP(sport=self.sport, dport=self.dport, flags='FA', seq=self.seq, ack=self.ack)
+      fin = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, flags='FA', seq=self.seq, ack=self.ack)
       fin_ack = sr1(fin, timeout=self._timeout)
       self.seq += 1
 
@@ -85,13 +92,13 @@ class TcpSession:
       assert fin_ack[TCP].ack == self.seq , 'Acknowledgment number error'
 
       self.ack = fin_ack[TCP].seq
-      ack = self.ip/TCP(sport=self.sport, dport=self.dport, flags='A', seq=self.seq,  ack=self.ack)
+      ack = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, flags='A', seq=self.seq,  ack=self.ack)
       send(ack)
 
       print('Disconnected')
 
    def build(self, payload):
-      psh = self.ip/TCP(sport=self.sport, dport=self.dport, flags='PA', seq=self.seq, ack=self.ack)/payload
+      psh = self.ether/self.ip/TCP(sport=self.sport, dport=self.dport, flags='PA', seq=self.seq, ack=self.ack)/payload
       self.seq += len(psh[Raw])
       return psh
 
@@ -109,7 +116,7 @@ class TcpSession:
      # assert ack.haslayer(TCP), 'TCP layer missing'
      # assert ack[TCP].flags & 0x10 == 0x10, 'No ACK flag'
      # assert ack[TCP].ack == self.seq , 'Acknowledgment number error'
-sess = TcpSession((sys.argv[1], sys.argv[2], 80))
+sess = TcpSession(sys.argv[1], (sys.argv[2], 80))
 sess.connect()
 sess.send('GET /index.html HTTP/1.1\r\n\r\n')
 #sess.close()
