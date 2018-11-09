@@ -9,6 +9,11 @@ from mininet.util import waitListening
 from mininet.topo import Topo
 from mininet.log import setLogLevel
 from mininet.util import dumpNodeConnections
+import subprocess
+import os
+import signal
+
+
 def sshd( network, cmd='/usr/sbin/sshd', opts='-D',
           ip='10.123.123.1/32', routes=None, switch=None ):
     """Start a network, connect it to root ns, and run sshd on all hosts.
@@ -218,6 +223,17 @@ def connectToRootNS( network, switch, ip, routes ):
 #itopos
 #sshd( MyTopo())
 setLogLevel('info')
+#subprocess.call("/home/ubuntu/ryu/bin/ryu-manager --verbose --enable-debugger  --ofp-tcp-listen-port 6634 /home/ubuntu/ryu/ryu/app/rest_router.py /home/ubuntu/ryu/ryu/app/ofctl_rest.py &",  shell=True)
+#subprocess.call("/home/ubuntu/ryu/bin/ryu-manager --verbose --enable-debugger  --ofp-tcp-listen-port 6633 /home/ubuntu/ryu/ryu/app/simple_switch_13.py &",  shell=True)
+subprocess.call("rm -rf /home/ubuntu/research/requestLogs.txt",  shell=True)
+subprocess.call("touch /home/ubuntu/research/requestLogs.txt",  shell=True)
+
 net = startSetup();
+
+subprocess.call("/bin/sh /home/ubuntu/research/routesNew.sh",  shell=True)
+pro = subprocess.Popen("python /home/ubuntu/research/sdnController.py &", shell=True, preexec_fn=os.setsid);
+
 CLI(net)
+os.killpg(os.getpgid(pro.pid), signal.SIGTERM)  # Send the signal to all the process groups
+
 net.stop()

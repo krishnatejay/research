@@ -35,8 +35,11 @@ def makeRequest(ipAddress):
 	(output, err) = process.communicate()
 	output = output.split('\n')
 	matching = [s for s in output if "addr" in s]
-	print ipAddress + " : " + str(matching)
-	exit_code = process.wait()
+	#print ipAddress + " : " + str(matching)
+	try:
+		exit_code = process.wait()
+	except:
+		print "Packet Handling Error"
 
 def processTraffic(addressList):
 	startTime = getEpochTime()

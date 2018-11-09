@@ -35,7 +35,7 @@ def makeRequest(ipAddress):
 	(output, err) = process.communicate()
 	output = output.split('\n')
 	matching = [s for s in output if "addr" in s]
-	print ipAddress + " : " + str(matching)
+	#print ipAddress + " : " + str(matching)
 	exit_code = process.wait()
 
 def processTraffic(addressList):
@@ -55,7 +55,7 @@ def processTraffic(addressList):
 			requestTracker[currentMinute] = requestTracker[currentMinute] + 1
 			randNumber = random.randint(0,len(addressList)-1)
 			makeRequest(addressList[randNumber])
-partitions = 10
+partitions = 5
 for i in range(partitions):
     partitionSize = len(normalHosts)/partitions
     process = Thread(target=processTraffic, args=[normalHosts[i*partitionSize: (i+1) * partitionSize]])

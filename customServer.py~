@@ -34,7 +34,10 @@ def outputStats():
 		currentMinute = (getEpochTime() - startTime)/60
 		
 		if(currentMinute-1 in requestStats.keys()):
-			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(requestStats[currentMinute -1 1]['requests'])
+			dropped = requestStats[currentMinute -1 ]['dropped']
+			requests = requestStats[currentMinute -1 ]['requests']
+			total = dropped + requests
+			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped)
 			subprocess.call("echo '" + a +"' >> requestLogs.txt", shell=True)
 			requestStats.pop(currentMinute - 1, None)
 		time.sleep(60)
@@ -49,7 +52,10 @@ class S(BaseHTTPRequestHandler):
 	currentMinute = (getEpochTime() - startTime)/60
 	if( currentMinute not in requestStats.keys()):
 		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0}
-	requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
+	if(requestStats[currentMinute]['requests'] > 20):
+		requestStats[currentMinute]['dropped'] = requestStats[currentMinute]['dropped'] + 1
+	else:
+		requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
         self._set_headers()
         self.wfile.write("Ip Address : " + str(value) + "\n")
 

@@ -13,7 +13,7 @@ class TcpSession:
       self.dport = target[1]
       self.connected = False
       self._ackThread = None
-      self._timeout = 3
+      self._timeout = 10
       
    def _ack(self, p):
       self.ack = p[TCP].seq + len(p[Raw])
@@ -60,10 +60,13 @@ class TcpSession:
       syn = self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='S')
       syn_ack = sr1(syn, timeout=self._timeout)
       self.seq += 1
-      
-      assert syn_ack.haslayer(TCP) , 'TCP layer missing'
-      assert syn_ack[TCP].flags & 0x12 == 0x12 , 'No SYN/ACK flags'
-      assert syn_ack[TCP].ack == self.seq , 'Acknowledgment number error'
+     
+      if(syn_ack.haslayer(TCP) != True):
+          sys.exit(0);
+      if(syn_ack[TCP].flags & 0x12 != 0x12):
+          sys.exit(0);
+      if(syn_ack[TCP].ack != self.seq):
+          sys.exit(0);
 
       self.ack = syn_ack[TCP].seq + 1
       ack = self.ip/TCP(sport=self.sport, dport=self.dport, seq=self.seq, flags='A', ack=self.ack)
