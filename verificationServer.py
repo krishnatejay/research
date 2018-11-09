@@ -17,7 +17,7 @@ import socket
 import commands
 from threading import Thread
 import time
-import requests 
+
 
 def getEpochTime():
 	seconds = int(round(time.time() ))
@@ -28,67 +28,36 @@ startTime = getEpochTime()
 value = str(commands.getstatusoutput('ifconfig | grep "inet" | grep "Bcast"')).strip().split('inet')[1].split(' ')[1]
 
 
-webServers = []
-verificationServers = []
-
 def outputStats():
-	global webServers
-	global verificationServers
 
 	while(True):
-		linesList = []
-                with open('/home/ubuntu/research/webServerConfig.txt') as f:
-  			linesList = list(f)
-		ws = []
-		vs = []
-		for line in linesList:
-			parts = line.strip().split()
-		
-			if(parts[0] =='w' ):
-				ws = [parts[1]] + ws
-			if(parts[0] == 'v'):
-				vs = [parts[1]] + vs
-		webServers = ws
-		verificationServers = vs
-		print webServers
-		print verificationServers
-				
 		currentMinute = (getEpochTime() - startTime)/60
 		
 		if(currentMinute-1 in requestStats.keys()):
 			dropped = requestStats[currentMinute -1 ]['dropped']
 			requests = requestStats[currentMinute -1 ]['requests']
 			total = dropped + requests
-			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped)
-			subprocess.call("echo '" + a +"' >> requestLogs.txt", shell=True)
+			a =  "V : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped)
+			subprocess.call("echo '" + a +"' >> webServerLogs.txt", shell=True)
 			requestStats.pop(currentMinute - 1, None)
 		time.sleep(60)
 
-index = 0
 class S(BaseHTTPRequestHandler):
-
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
     def do_GET(self):
-	global index
-	index = index +1 
 	currentMinute = (getEpochTime() - startTime)/60
 	if( currentMinute not in requestStats.keys()):
 		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0}
-	if(requestStats[currentMinute]['requests'] > 20):
+	if(requestStats[currentMinute]['requests'] > 10):
 		requestStats[currentMinute]['dropped'] = requestStats[currentMinute]['dropped'] + 1
 	else:
 		requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
         self._set_headers()
-
-	serverChoosed = webServers[index%len(webServers)]
-	url = "http://" + serverChoosed
-	r = requests.get(url = url) 
-
-        self.wfile.write("Response : " + str(r.text) + "\n")
+        self.wfile.write("Ip Address : " + str(value) + " W \n")
 
     def do_HEAD(self):
         self._set_headers()

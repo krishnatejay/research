@@ -191,6 +191,23 @@ def startSetup():
     bd14.cmd('sudo python  customServer.py >> botdLogs.txt &')
     bd15.cmd('sudo python  customServer.py >> botdLogs.txt &')
 
+    ws1.cmd('sudo python webServer.py > /dev/null &')
+    ws2.cmd('sudo python webServer.py > /dev/null &')
+    ws3.cmd('sudo python webServer.py > /dev/null &')
+    ws4.cmd('sudo python webServer.py > /dev/null &')
+    ws5.cmd('sudo python webServer.py > /dev/null &')
+    ws6.cmd('sudo python webServer.py > /dev/null &')
+    ws7.cmd('sudo python webServer.py > /dev/null &')
+    ws8.cmd('sudo python webServer.py > /dev/null &')
+    ws9.cmd('sudo python webServer.py > /dev/null &')
+    ws10.cmd('sudo python webServer.py > /dev/null &')
+
+    vs1.cmd('sudo python verificationServer.py > /dev/null &')
+    vs2.cmd('sudo python verificationServer.py > /dev/null &')
+    vs3.cmd('sudo python verificationServer.py > /dev/null &')
+    vs4.cmd('sudo python verificationServer.py > /dev/null &')
+    vs5.cmd('sudo python verificationServer.py > /dev/null &')
+
     c1.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 10.2.0.101/24 -j DROP')
     c2.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 10.2.0.101/24 -j DROP')
     c1.cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -d 1.1.1.1 -j DROP')
@@ -227,7 +244,9 @@ setLogLevel('info')
 #subprocess.call("/home/ubuntu/ryu/bin/ryu-manager --verbose --enable-debugger  --ofp-tcp-listen-port 6633 /home/ubuntu/ryu/ryu/app/simple_switch_13.py &",  shell=True)
 subprocess.call("rm -rf /home/ubuntu/research/requestLogs.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/requestLogs.txt",  shell=True)
-
+subprocess.call("rm -rf /home/ubuntu/research/webServerLogs.txt",  shell=True)
+subprocess.call("touch /home/ubuntu/research/webServerLogs.txt",  shell=True)
+subprocess.call("python /home/ubuntu/research/webServerScaler.py &",  shell=True)
 net = startSetup();
 
 subprocess.call("/bin/sh /home/ubuntu/research/routesNew.sh",  shell=True)

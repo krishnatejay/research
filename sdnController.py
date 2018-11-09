@@ -177,7 +177,7 @@ def handleLines(lines):
 			i = i+21
 		#	print "TotalRequstCount : " + str(totalRequestCount) + " counter : " + str(i)
 	if(totalRequestCount < (len(partitionMappings.keys()) -1) * 21):
-		nodesToBeRemoved = ((len(partitionMappings.keys()) -1) * 21 - totalRequestCount)/21;
+		nodesToBeRemoved = ((len(partitionMappings.keys())) * 21 - totalRequestCount)/21;
 		for i in range(nodesToBeRemoved):
 			removeNode()
 		
