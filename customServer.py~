@@ -31,7 +31,8 @@ value = str(commands.getstatusoutput('ifconfig | grep "inet" | grep "Bcast"')).s
 webServers = []
 verificationServers = []
 ipStats = {}
-
+ipCurrentStatus = {}
+blockedIps = []
 def outputStats():
 	global webServers
 	global verificationServers
@@ -51,8 +52,6 @@ def outputStats():
 				vs = [parts[1]] + vs
 		webServers = ws
 		verificationServers = vs
-		print webServers
-		print verificationServers
 				
 		currentMinute = (getEpochTime() - startTime)/60
 		
@@ -60,15 +59,21 @@ def outputStats():
 			dropped = requestStats[currentMinute -1 ]['dropped']
 			requests = requestStats[currentMinute -1 ]['requests']
 			total = dropped + requests
-			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped)
+			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped) + " : " + str(ipCurrentStatus)
 			subprocess.call("echo '" + a +"' >> requestLogs.txt", shell=True)
 			requestStats.pop(currentMinute - 1, None)
 			currentStats = ipStats[currentMinute -1]
 			output = ""
 			for ip in currentStats:
 				output = output + "Host : " + value + " Client : " + ip + ": currentMinute : " +  str(currentMinute -1) + " Requests : " + str(currentStats[ip]['requests']) + " Bytes : " +  str(currentStats[ip]['bytes']) + "\n"
-			subprocess.call("echo '" + output[:-2] +"' >> ipStats.txt", shell=True)			
+			subprocess.call("echo '" + output[:-1] +"' >> ipStats.txt", shell=True)			
 			ipStats.pop(currentMinute - 1, None)
+		with open('/home/ubuntu/research/anomaly.txt') as f:
+  			linesList = list(f)
+		for line in linesList:
+			anomalyIp = line.strip()
+			if(anomalyIp not in ipCurrentStatus and len(anomalyIp) > 5):
+				ipCurrentStatus[anomalyIp] = 'A'
 		time.sleep(60)
 
 index = 0
@@ -85,6 +90,11 @@ class S(BaseHTTPRequestHandler):
 	index = index +1 
 	currentMinute = (getEpochTime() - startTime)/60
 	clientIp = self.client_address[0]
+	response = ''
+	if(clientIp in ipCurrentStatus and ipCurrentStatus[clientIp] == "B"):
+		self._set_headers()
+        	self.wfile.write("Response : " + str(response) + "\n")
+		return
 	if(currentMinute not in ipStats.keys()):
 		ipStats[currentMinute] = {}
 	if(clientIp not in ipStats[currentMinute].keys()):
@@ -98,13 +108,19 @@ class S(BaseHTTPRequestHandler):
 			ipStats[currentMinute][clientIp] = {"requests": 0, "bytes" : 0} 
 		requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
 		ipStats[currentMinute][clientIp]['requests'] = ipStats[currentMinute][clientIp]['requests'] + 1
-        self._set_headers()
-
-	serverChoosed = webServers[index%len(webServers)]
-	url = "http://" + serverChoosed
-	r = requests.get(url = url) 
-
-        self.wfile.write("Response : " + str(ipStats) + "\n")
+		serverChoosed = webServers[index%len(webServers)]
+		if(clientIp in ipCurrentStatus):
+			if(self.path.endswith("index.html")):
+				print "index.html"
+				ipCurrentStatus[clientIp] = 'N'
+			else:
+				ipCurrentStatus[clientIp] = 'B'
+		url = "http://" + serverChoosed + str(self.path)
+		r = requests.get(url = url) 
+		response = r.text
+		ipStats[currentMinute][clientIp]['bytes'] = ipStats[currentMinute][clientIp]['bytes'] + len(response)		
+	self._set_headers()
+        self.wfile.write("Response : " + str(response + self.path) + "\n")
 
     def do_HEAD(self):
         self._set_headers()

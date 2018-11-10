@@ -61,7 +61,7 @@ class TcpSession:
       syn_ack = sr1(syn, timeout=self._timeout)
       self.seq += 1
      
-      if(type(syn_ack) is NoneType or syn_ack.haslayer(TCP) != True):
+      if(syn_ack.haslayer(TCP) != True):
           sys.exit(0);
       if(syn_ack[TCP].flags & 0x12 != 0x12):
           sys.exit(0);

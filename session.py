@@ -113,6 +113,7 @@ class TcpSession:
      # assert ack[TCP].flags & 0x10 == 0x10, 'No ACK flag'
      # assert ack[TCP].ack == self.seq , 'Acknowledgment number error'
 sess = TcpSession(sys.argv[1], (sys.argv[2], 80))
+url = sys.argv[3].strip()
 sess.connect()
-sess.send('GET /index.html HTTP/1.1\r\n\r\n')
+sess.send('GET /'+ url+ ' HTTP/1.1\r\n\r\n')
 #sess.close()

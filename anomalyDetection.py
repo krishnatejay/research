@@ -20,10 +20,10 @@ def dumpToFile(anomalies):
 	output = ""
 	for anomaly in anomalies:
 		output = output + anomaly + "\n"
-	subprocess.call("echo '"  + output[:-1] + "' > /home/ubuntu/research/anomaly.txt",  shell=True)
+	subprocess.call("echo '"  + output[:-1] + "' >> /home/ubuntu/research/anomaly.txt",  shell=True)
 
 while(True):
-	time.sleep(60)
+	time.sleep(15)
 	with open("/home/ubuntu/research/ipStats.txt") as f:
 		myList = list(f)
 	if(len(myList) < 2):

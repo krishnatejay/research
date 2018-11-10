@@ -19,29 +19,41 @@ print trafficPatternLines
 
 bots = []
 normalHosts = []
+hostMappings = {}
 
 
 for line in lines :
 	parts = line.strip().split(",")
 	if(parts[1] == "b"):
 		bots = bots + [parts[0]]
+		hostMappings[parts[0]] = 'b'
 	else:
 		normalHosts = normalHosts + [parts[0]]
+		hostMappings[parts[0]] = 'n'
+	
 
 threads = []
 
-def makeRequest(ipAddress):			
-	process = Popen(["python", "session.py", ipAddress, "10.2.0.115"], stdout=PIPE)
+def makeRequest(ipAddress):
+	url = "index.html"
+	if(hostMappings[ipAddress] == 'b'):
+		url = "index1.html"	
+	randNumber = random.randint(0,10000)				
+	process = Popen(["python", "session.py", ipAddress, "10.2.0.115", url], stdout=PIPE)
+	process1 = process
+	if(hostMappings[ipAddress] == 'b' and randNumber % 5 == 0):
+		process1 = Popen(["python", "session.py", ipAddress, "10.2.0.115", url], stdout=PIPE)
+		(output, err) = process1.communicate()		
 	(output, err) = process.communicate()
-	output = output.split('\n')
-	matching = [s for s in output if "addr" in s]
 	#print ipAddress + " : " + str(matching)
 	try:
 		exit_code = process.wait()
+		exit_code = process1.wait()
 	except:
 		print "Packet Handling Error"
 
 def processTraffic(addressList):
+	print len(addressList)
 	startTime = getEpochTime()
 	endTime = startTime + 60 * len(trafficPatternLines)
 	requestTracker = {}
@@ -58,12 +70,19 @@ def processTraffic(addressList):
 			requestTracker[currentMinute] = requestTracker[currentMinute] + 1
 			randNumber = random.randint(0,len(addressList)-1)
 			makeRequest(addressList[randNumber])
-partitions = 5
+partitions = 2
 for i in range(partitions):
     partitionSize = len(normalHosts)/partitions
     process = Thread(target=processTraffic, args=[normalHosts[i*partitionSize: (i+1) * partitionSize]])
     process.start()
-    threads.append(process)	
+    threads.append(process)
+botPartitions = 3
+for i in range(botPartitions):
+    partitionSize = len(bots)/botPartitions
+    process = Thread(target=processTraffic, args=[bots[i*partitionSize: (i+1) * partitionSize]])
+    process.start()
+    threads.append(process)
+	
 for process in threads:
     process.join()
 
