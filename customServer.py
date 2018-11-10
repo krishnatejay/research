@@ -30,6 +30,7 @@ value = str(commands.getstatusoutput('ifconfig | grep "inet" | grep "Bcast"')).s
 
 webServers = []
 verificationServers = []
+ipStats = {}
 
 def outputStats():
 	global webServers
@@ -62,6 +63,12 @@ def outputStats():
 			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped)
 			subprocess.call("echo '" + a +"' >> requestLogs.txt", shell=True)
 			requestStats.pop(currentMinute - 1, None)
+			currentStats = ipStats[currentMinute -1]
+			output = ""
+			for ip in currentStats:
+				output = output + "Host : " + value + " Client : " + ip + ": currentMinute : " +  str(currentMinute -1) + " Requests : " + str(currentStats[ip]['requests']) + " Bytes : " +  str(currentStats[ip]['bytes']) + "\n"
+			subprocess.call("echo '" + output[:-2] +"' >> ipStats.txt", shell=True)			
+			ipStats.pop(currentMinute - 1, None)
 		time.sleep(60)
 
 index = 0
@@ -74,14 +81,23 @@ class S(BaseHTTPRequestHandler):
 
     def do_GET(self):
 	global index
+	global ipStats
 	index = index +1 
 	currentMinute = (getEpochTime() - startTime)/60
+	clientIp = self.client_address[0]
+	if(currentMinute not in ipStats.keys()):
+		ipStats[currentMinute] = {}
+	if(clientIp not in ipStats[currentMinute].keys()):
+		ipStats[currentMinute][clientIp] = {"requests": 0, "bytes" : 0}    
 	if( currentMinute not in requestStats.keys()):
 		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0}
 	if(requestStats[currentMinute]['requests'] > 20):
 		requestStats[currentMinute]['dropped'] = requestStats[currentMinute]['dropped'] + 1
 	else:
+		if(clientIp not in ipStats[currentMinute].keys()):
+			ipStats[currentMinute][clientIp] = {"requests": 0, "bytes" : 0} 
 		requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
+		ipStats[currentMinute][clientIp]['requests'] = ipStats[currentMinute][clientIp]['requests'] + 1
         self._set_headers()
 
 	serverChoosed = webServers[index%len(webServers)]
