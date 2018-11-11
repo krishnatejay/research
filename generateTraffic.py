@@ -79,22 +79,22 @@ def processTraffic(addressList):
 			requestTracker[currentMinute] = requestTracker[currentMinute] + 1
 			randNumber = random.randint(0,len(addressList)-1)
 			makeRequest(addressList[randNumber])
-partitions = 4
+partitions = 6
 for i in range(partitions):
     partitionSize = len(normalHosts)/partitions
     process = Thread(target=processTraffic, args=[normalHosts[i*partitionSize: (i+1) * partitionSize]])
     process.start()
     threads.append(process)
-botPartitions = 2
-for i in range(botPartitions):
-    partitionSize = len(bots)/botPartitions
-    if(i ==1):
-	trafficBots = bots[i*partitionSize: (i+1) * partitionSize]
-	for botIp in trafficBots:
-		hostMappings[botIp] = 'bt'
-    process = Thread(target=processTraffic, args=[bots[i*partitionSize: (i+1) * partitionSize]])
-    process.start()
-    threads.append(process)
+#botPartitions = 2
+#for i in range(botPartitions):
+#    partitionSize = len(bots)/botPartitions
+#    if(i ==1):
+#	trafficBots = bots[i*partitionSize: (i+1) * partitionSize]
+#	for botIp in trafficBots:
+#		hostMappings[botIp] = 'bt'
+#    process = Thread(target=processTraffic, args=[bots[i*partitionSize: (i+1) * partitionSize]])
+#    process.start()
+#    threads.append(process)
 	
 for process in threads:
     process.join()

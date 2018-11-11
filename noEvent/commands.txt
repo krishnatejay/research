@@ -1,0 +1,7 @@
+cd /home/ubuntu/ryu && ./bin/ryu-manager --verbose --enable-debugger --ofp-tcp-listen-port 6634  ryu/app/ofctl_rest.py ryu/app/rest_router.py
+cd /home/ubuntu/ryu && ./bin/ryu-manager --verbose --enable-debugger --ofp-tcp-listen-port 6633  ryu/app/simple_switch_13.py
+
+
+/home/ubuntu/ryu/bin/ryu-manager --verbose --enable-debugger --ofp-tcp-listen-port 6634  /home/ubuntu/ryu/ryu/app/ofctl_rest.py /home/ubuntu/ryu/ryu/app/rest_router.py
+/home/ubuntu/ryu/bin/ryu-manager --verbose --enable-debugger --ofp-tcp-listen-port 6633  /home/ubuntu/ryu/ryu/app/simple_switch_13.py
+sudo python /home/ubuntu/research/sdnController.py

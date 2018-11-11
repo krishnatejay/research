@@ -253,7 +253,7 @@ subprocess.call("touch /home/ubuntu/research/webServerLogs.txt",  shell=True)
 subprocess.call("rm -rf /home/ubuntu/research/anomaly.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/anomaly.txt",  shell=True)
 pro2 = subprocess.Popen("python /home/ubuntu/research/webServerScaler.py &", shell=True, preexec_fn=os.setsid);
-#pro1 = subprocess.Popen("python /home/ubuntu/research/anomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
+pro3 = subprocess.Popen("python /home/ubuntu/research/anomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
 pro1 = subprocess.Popen("python /home/ubuntu/research/trafficAnomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
 net = startSetup();
 
@@ -264,4 +264,5 @@ CLI(net)
 os.killpg(os.getpgid(pro.pid), signal.SIGTERM)  # Send the signal to all the process groups
 os.killpg(os.getpgid(pro1.pid), signal.SIGTERM)  # Send the signal to all the process groups
 os.killpg(os.getpgid(pro2.pid), signal.SIGTERM)  # Send the signal to all the process groups
+os.killpg(os.getpgid(pro3.pid), signal.SIGTERM)  # Send the signal to all the process groups
 net.stop()

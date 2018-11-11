@@ -36,14 +36,14 @@ threads = []
 
 def makeRequest(ipAddress):
 	url = "index.html"
-	if(hostMappings[ipAddress] == 'b'):
+	if(hostMappings[ipAddress] == 'b' or hostMappings[ipAddress] == 'bt'):
 		url = "index1.html"	
 
 	randNumber = random.randint(0,10000)
 	if(hostMappings[ipAddress] == 'bt' and randNumber % 5 == 0):
 		url = "doubleload.html"
 	
-	if(randNumber % 16 == 0 and hostMappings[ipAddress] != 'b'):
+	if(randNumber % 8 == 0 and hostMappings[ipAddress] != 'b'):
 		url = "doubleload.html"			
 	process = Popen(["python", "session.py", ipAddress, "10.2.0.115", url], stdout=PIPE)
 	process1 = process
@@ -79,22 +79,22 @@ def processTraffic(addressList):
 			requestTracker[currentMinute] = requestTracker[currentMinute] + 1
 			randNumber = random.randint(0,len(addressList)-1)
 			makeRequest(addressList[randNumber])
-partitions = 4
+partitions = 6
 for i in range(partitions):
     partitionSize = len(normalHosts)/partitions
     process = Thread(target=processTraffic, args=[normalHosts[i*partitionSize: (i+1) * partitionSize]])
     process.start()
     threads.append(process)
-botPartitions = 2
-for i in range(botPartitions):
-    partitionSize = len(bots)/botPartitions
-    if(i ==1):
-	trafficBots = bots[i*partitionSize: (i+1) * partitionSize]
-	for botIp in trafficBots:
-		hostMappings[botIp] = 'bt'
-    process = Thread(target=processTraffic, args=[bots[i*partitionSize: (i+1) * partitionSize]])
-    process.start()
-    threads.append(process)
+#botPartitions = 2
+#for i in range(botPartitions):
+#    partitionSize = len(bots)/botPartitions
+#    if(i ==1):
+#	trafficBots = bots[i*partitionSize: (i+1) * partitionSize]
+#	for botIp in trafficBots:
+#		hostMappings[botIp] = 'bt'
+#    process = Thread(target=processTraffic, args=[bots[i*partitionSize: (i+1) * partitionSize]])
+#    process.start()
+#    threads.append(process)
 	
 for process in threads:
     process.join()
