@@ -63,7 +63,7 @@ class S(BaseHTTPRequestHandler):
 	elif (self.path.endswith("index1.html")):
 		self.wfile.write("Ip Address : " + str(value) + " W \n")
 	elif (self.path.endswith("doubleload.html")):
-		self.wfile.write("Ip Address : " + str(value) + " W \n" + "Ip Address : " + str(value) + " W \n")
+		self.wfile.write("Ip Address : " + str(value) + " W \n" + "Ip Address : " + str(value) + " W"  + "Ip Address : " + str(value) + " W " + "\n")
 
     def do_HEAD(self):
         self._set_headers()

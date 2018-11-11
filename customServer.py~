@@ -58,22 +58,33 @@ def outputStats():
 		if(currentMinute-1 in requestStats.keys()):
 			dropped = requestStats[currentMinute -1 ]['dropped']
 			requests = requestStats[currentMinute -1 ]['requests']
+			blocked = requestStats[currentMinute -1 ]['blocked']
+			falseAlarms = requestStats[currentMinute -1 ]['falseAlarms']
+			blockedRequests = requestStats[currentMinute -1 ]['blockedRequets']
 			total = dropped + requests
-			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped) + " : " + str(ipCurrentStatus)
+			a =  "Bot Detector : " + str(value) + " Minute : " + str(currentMinute -1 ) + " Request Count : " + str(total) + " Success Count : " +  str(requests) + " Dropped : " + str(dropped) + " Blocked : " + str(blocked) + " False Alarms : " + str(falseAlarms) +  " Blocked requests : " + str(blockedRequests) 
 			subprocess.call("echo '" + a +"' >> requestLogs.txt", shell=True)
 			requestStats.pop(currentMinute - 1, None)
 			currentStats = ipStats[currentMinute -1]
 			output = ""
 			for ip in currentStats:
-				output = output + "Host : " + value + " Client : " + ip + ": currentMinute : " +  str(currentMinute -1) + " Requests : " + str(currentStats[ip]['requests']) + " Bytes : " +  str(currentStats[ip]['bytes']) + "\n"
+				output = output + "Host : " + value + " Client : " + ip + ": currentMinute : " +  str(currentMinute -1) + " Requests : " + str(currentStats[ip]['requests']) + " Bytes : " +  str(currentStats[ip]['bytes']) +  "\n"
 			subprocess.call("echo '" + output[:-1] +"' >> ipStats.txt", shell=True)			
 			ipStats.pop(currentMinute - 1, None)
 		with open('/home/ubuntu/research/anomaly.txt') as f:
   			linesList = list(f)
 		for line in linesList:
-			anomalyIp = line.strip()
+			if(len(line) < 5):
+				continue
+			anomalyIp = line.split()[0].strip()
 			if(anomalyIp not in ipCurrentStatus and len(anomalyIp) > 5):
 				ipCurrentStatus[anomalyIp] = 'A'
+		with open('/home/ubuntu/research/blocked.txt') as f:
+  			linesList = list(f)
+		for line in linesList:
+			if(len(line) > 5):
+				anomalyIp = line.split()[0].strip()
+				ipCurrentStatus[anomalyIp] = 'B'
 		time.sleep(60)
 
 index = 0
@@ -91,16 +102,17 @@ class S(BaseHTTPRequestHandler):
 	currentMinute = (getEpochTime() - startTime)/60
 	clientIp = self.client_address[0]
 	response = ''
-	if(clientIp in ipCurrentStatus and ipCurrentStatus[clientIp] == "B"):
+	if( currentMinute not in requestStats.keys()):
+		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0, "blockedRequests" : 0, "blocked" : 0, "falseAlarms":0}
+	if(clientIp in ipCurrentStatus and ipCurrentStatus[clientIp] == "B" and self.path.endswith("index.html") == False):
+		requestStats[currentMinute]['blockedRequests'] = requestStats[currentMinute]['blockedRequests'] + 1
 		self._set_headers()
-        	self.wfile.write("Response : " + str(response) + "\n")
+        	self.wfile.write("blocked response : " + str(response) + "\n")
 		return
 	if(currentMinute not in ipStats.keys()):
-		ipStats[currentMinute] = {}
-	if(clientIp not in ipStats[currentMinute].keys()):
-		ipStats[currentMinute][clientIp] = {"requests": 0, "bytes" : 0}    
+		ipStats[currentMinute] = {}  
 	if( currentMinute not in requestStats.keys()):
-		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0}
+		requestStats[currentMinute] = {"requests" : 0, "dropped" : 0, "blocked" : 0, "falseAlarms":0}
 	if(requestStats[currentMinute]['requests'] > 20):
 		requestStats[currentMinute]['dropped'] = requestStats[currentMinute]['dropped'] + 1
 	else:
@@ -109,12 +121,21 @@ class S(BaseHTTPRequestHandler):
 		requestStats[currentMinute]['requests'] = requestStats[currentMinute]['requests'] + 1
 		ipStats[currentMinute][clientIp]['requests'] = ipStats[currentMinute][clientIp]['requests'] + 1
 		serverChoosed = webServers[index%len(webServers)]
-		if(clientIp in ipCurrentStatus):
+		print clientIp
+		print ipCurrentStatus.keys()
+		if(clientIp in ipCurrentStatus.keys()):
 			if(self.path.endswith("index.html")):
-				print "index.html"
-				ipCurrentStatus[clientIp] = 'N'
+				if(ipCurrentStatus[clientIp] == "A" ):
+					requestStats[currentMinute]['falseAlarms'] = requestStats[currentMinute]['falseAlarms'] + 1
+					ipCurrentStatus[clientIp] = 'N'
+				if(ipCurrentStatus[clientIp] == "B" ):
+					ipCurrentStatus[clientIp] = 'N'
 			else:
-				ipCurrentStatus[clientIp] = 'B'
+				if(ipCurrentStatus[clientIp] == "A"):
+					subprocess.call("printf '" + clientIp + " " + str(currentMinute) +"\n' >> blocked.txt", shell=True)
+					requestStats[currentMinute]['blocked'] = requestStats[currentMinute]['blocked'] + 1
+					ipCurrentStatus[clientIp] = 'B'
+			
 		url = "http://" + serverChoosed + str(self.path)
 		r = requests.get(url = url) 
 		response = r.text

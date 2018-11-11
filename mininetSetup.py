@@ -247,11 +247,14 @@ subprocess.call("rm -rf /home/ubuntu/research/ipStats.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/requestLogs.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/ipStats.txt",  shell=True)
 subprocess.call("rm -rf /home/ubuntu/research/webServerLogs.txt",  shell=True)
+subprocess.call("rm -rf /home/ubuntu/research/blocked.txt",  shell=True)
+subprocess.call("touch /home/ubuntu/research/blocked.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/webServerLogs.txt",  shell=True)
 subprocess.call("rm -rf /home/ubuntu/research/anomaly.txt",  shell=True)
 subprocess.call("touch /home/ubuntu/research/anomaly.txt",  shell=True)
 pro2 = subprocess.Popen("python /home/ubuntu/research/webServerScaler.py &", shell=True, preexec_fn=os.setsid);
-pro1 = subprocess.Popen("python /home/ubuntu/research/anomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
+#pro1 = subprocess.Popen("python /home/ubuntu/research/anomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
+pro1 = subprocess.Popen("python /home/ubuntu/research/trafficAnomalyDetection.py  &", shell=True, preexec_fn=os.setsid);
 net = startSetup();
 
 subprocess.call("/bin/sh /home/ubuntu/research/routesNew.sh",  shell=True)

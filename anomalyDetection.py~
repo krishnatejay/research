@@ -4,6 +4,8 @@ from numpy import percentile
 import time
 import subprocess
 
+currentMinute = 0
+
 def getOutliers(data):
 	q25, q75 = percentile(data, 25), percentile(data, 75)
 	iqr = q75 - q25
@@ -17,13 +19,15 @@ def getOutliers(data):
 #time.sleep(10)
 
 def dumpToFile(anomalies):
+	global currentMinute
 	output = ""
 	for anomaly in anomalies:
-		output = output + anomaly + "\n"
-	subprocess.call("echo '"  + output[:-1] + "' > /home/ubuntu/research/anomaly.txt",  shell=True)
+		output = output + anomaly +" " + currentMinute + "\n"
+	subprocess.call("echo '"  + output[:-1] + "' >> /home/ubuntu/research/anomaly.txt",  shell=True)
 
 while(True):
-	time.sleep(15)
+	global currentMinute
+	time.sleep(59)
 	with open("/home/ubuntu/research/ipStats.txt") as f:
 		myList = list(f)
 	if(len(myList) < 2):
