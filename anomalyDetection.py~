@@ -4,8 +4,8 @@ from numpy import percentile
 import time
 import subprocess
 
-currentMinute = 0
 
+currentMinute = 0
 def getOutliers(data):
 	q25, q75 = percentile(data, 25), percentile(data, 75)
 	iqr = q75 - q25
@@ -51,5 +51,6 @@ while(True):
 	outLiers = []
 	for value in outLierValues:
 		outLiers = outLiers + valueMappings[value]
-	dumpToFile(outLiers)
+	if(len(outLiers) > 3):
+		dumpToFile(outLiers[:-3])
 	

@@ -51,5 +51,6 @@ while(True):
 	outLiers = []
 	for value in outLierValues:
 		outLiers = outLiers + valueMappings[value]
-	dumpToFile(outLiers)
+	if(len(outLiers) > 3):
+		dumpToFile(outLiers[:-2])
 	

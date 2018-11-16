@@ -27,7 +27,7 @@ def dumpToFile(anomalies):
 
 while(True):
 	global currentMinute
-	#time.sleep(59)
+	time.sleep(59)
 	with open("/home/ubuntu/research/ipStats.txt") as f:
 		myList = list(f)
 	if(len(myList) < 2):
@@ -54,5 +54,4 @@ while(True):
 		outLiers = outLiers + valueMappings[value]
 	print outLiers
 	dumpToFile(outLiers)
-	break
 	

@@ -53,5 +53,6 @@ while(True):
 	for value in outLierValues:
 		outLiers = outLiers + valueMappings[value]
 	print outLiers
-	dumpToFile(outLiers)
+	if(len(outLiers) > 3):
+		dumpToFile(outLiers[:-2])
 	
